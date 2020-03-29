@@ -12,3 +12,36 @@ body {
     -moz-border-radius: 5px;
     border-radius: 5px;
 }
+
+/*
+https://zeph.co/grid
+*/
+.column {
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    color: #000;
+    font-size: 14px;
+    text-transform: uppercase;
+    font-weight: bold;
+    padding: 1.5vw 1vw;
+    text-align: center;
+}
+.grid {
+	display: flex;
+	flex-wrap: wrap;
+}
+
+.column {
+	box-sizing: border-box;
+	flex: 1;
+}
+
+.bigger { flex: 2.5; }
+
+.halves .column  { flex: 0 0 50%; }
+.thirds .column  { flex: 0 0 33.3333%; }
+.fourths .column { flex: 0 0 25%; }
+/*
+@media (max-width: 900px) {
+	.grid { display: block; }
+}
+*/
