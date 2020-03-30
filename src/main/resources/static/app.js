@@ -28,6 +28,15 @@ function connect()
             console.log('Players Body: '+players.body);
             showPlayers(JSON.parse(players.body));
         });        
+        stompClient.subscribe('/topic/errors', function (message) 
+        {
+            console.log('Error Message: '+message);
+        });
+		stompClient.subscribe('/user/queue/private', function (message) 
+		{
+		    console.log('Message on the user queue: '+message);
+		    alert('Message on the user queue: '+message);
+		});	
     });
 }
 
@@ -40,7 +49,19 @@ function disconnect()
 
 function sendName() {stompClient.send("/app/chat", {}, JSON.stringify({'content': $("#content").val()}));}
 
-function enterRoom() {stompClient.send("/app/room", {}, JSON.stringify({'name': $("#playerName").val()}));}
+function enterRoom() 
+{
+	var playerName = $("#playerName").val();
+    stompClient.subscribe('/user/'+playerName+'/queue/private', function (message) 
+    {
+        console.log('Message on the user queue: '+message);
+    });	
+    stompClient.subscribe('/queue/private/'+playerName, function (message) 
+    {
+        console.log('Message on the user queue: '+message);
+    });	
+	stompClient.send("/app/room/enter", {}, playerName);
+}
 
 function showMessage(message) {$("#messages").append("<tr><td>" + message + "</td></tr>");}
 
