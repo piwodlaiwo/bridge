@@ -1,6 +1,7 @@
 package com.kadziela.games.bridge.controllers;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -10,6 +11,8 @@ import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.Assert;
+
+import com.kadziela.games.bridge.model.Card;
 import com.kadziela.games.bridge.model.Player;
 import com.kadziela.games.bridge.model.Table;
 import com.kadziela.games.bridge.model.enumeration.SeatPosition;
@@ -69,10 +72,16 @@ public class TableController
 	    	
 	    	Player player = roomService.findByName(playerName);
 	    	Assert.notNull(player,String.format("Player named %s is not in the room",playerName));
-	    	tableService.sitDown(player, Long.valueOf(tableId), SeatPosition.valueOf(position));
+	    	Table table = tableService.sitDown(player, Long.valueOf(tableId), SeatPosition.valueOf(position));
 	    	
 	    	messagingTemplate.convertAndSend("/queue/private/"+playerName, String.format("you have successfully sat down at table %s in position %s",tableId,position));
 	    	messagingTemplate.convertAndSend("/topic/table/"+tableId, String.format("player %s has successfully sat down at table %s in position %s",playerName,tableId,position));
+	    	
+	    	if(table.getAllSeatedPlayers().size() == 4)
+	    	{
+	    		logger.debug(String.format("4 players have sat down at table %s, so dealing will commence shortly ",tableId));
+	    		deal(Long.valueOf(tableId));
+	    	}
 	    }
 	    catch (IllegalArgumentException iae)
 	    {
@@ -129,5 +138,33 @@ public class TableController
 		    messagingTemplate.convertAndSend("/topic/errors",
 	    		String.format("An IllegalStateException occurred while trying to stand up a player %s at table %s and position %s. The error message is: %s",playerName,tableId,position,ise.getMessage()));	    	
 	    }	    
+	}
+	/**
+	 * Given the id of a table in the room, this method will validate that there are 4 players sitting and deal the cards. 
+	 * The first dealer is selected by dealing a card face up to every player; the player with the highest card becomes the first dealer.
+	 * Afterwards, the dealer moves clockwise around the table.
+	 * @param tableId the id of the table where the dealing is to take place 
+	 */
+	@MessageMapping("/table/deal")
+	public void deal(Long tableId)
+	{
+		logger.debug(String.format("Table Controller is about to deal cards at table %s", tableId));
+		Table table = tableService.findById(tableId);
+		try
+		{
+			Assert.notNull(table, String.format("Cannot find any existing tables for table id %s",tableId));
+			if (table.getCurrentDealer() == null)
+			{
+				logger.debug(String.format("dealing at table %s for the first time, choosing the first dealer ... ", table));
+
+			}
+
+		}
+		catch (IllegalArgumentException iae)
+	    {
+	    	logger.error(String.format("An IllegalArgumentException occurred while trying to deal cards at table with id %s ",tableId),iae);
+		    messagingTemplate.convertAndSend("/topic/errors",
+		    		String.format("An IllegalArgumentException occurred while trying to deal cards at table with id %s. The error message is: %s",tableId,iae.getMessage()));	    	
+	    }	    	    
 	}
 }

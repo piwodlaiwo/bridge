@@ -2,7 +2,10 @@ package com.kadziela.games.bridge.service;
 
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
+import java.util.NavigableMap;
+import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.logging.log4j.LogManager;
@@ -10,8 +13,11 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
+import org.springframework.util.Assert;
 
+import com.kadziela.games.bridge.model.Card;
 import com.kadziela.games.bridge.model.Player;
+import com.kadziela.games.bridge.model.SeatedPlayer;
 import com.kadziela.games.bridge.model.Table;
 import com.kadziela.games.bridge.model.enumeration.SeatPosition;
 
@@ -54,5 +60,32 @@ public class TableService
 		}
 		table.standUp(position);
 		return table;
+	}
+	public Table findById(Long tableId) {return tables.get(tableId);}
+	public void deal(Table table)
+	{
+		Assert.notNull(table, "Cannot deal on a null table");
+	}
+	public SeatedPlayer chooseFirstDealer(Table table) throws IllegalArgumentException
+	{
+		Assert.notNull(table, "Cannot choose a dealer on a null table");
+		List<Card> shuffledDeck = table.getDeck().getShuffled();
+		Card north = shuffledDeck.get(0);
+		logger.debug(String.format("NORTH card is %s", north));
+		Card east = shuffledDeck.get(1);
+		logger.debug(String.format("EAST card is %s", east));
+		Card south = shuffledDeck.get(2);
+		logger.debug(String.format("SOUTH card is %s", south));
+		Card west = shuffledDeck.get(3);
+		logger.debug(String.format("WEST card is %s", west));
+		logger.debug("sorting ... ");
+		NavigableMap<Card,SeatPosition> map = new TreeMap<Card,SeatPosition>();
+		map.put(north,SeatPosition.NORTH);
+		map.put(east,SeatPosition.EAST);
+		map.put(south,SeatPosition.SOUTH);
+		map.put(west,SeatPosition.WEST);
+		Map.Entry<Card, SeatPosition> lastEntry = map.lastEntry();
+		logger.debug(String.format("the best card is %s, so the dealer is %s",lastEntry.getKey(),lastEntry.getValue()));
+		return table.getPlayerAtPosition(lastEntry.getValue());
 	}
 }
