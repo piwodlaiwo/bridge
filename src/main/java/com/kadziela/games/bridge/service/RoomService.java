@@ -30,4 +30,5 @@ public class RoomService
 	}
 	public Player removePlayer(String name) {return players.remove(name);}
 	public Collection<Player> getPlayers(){return new HashSet<Player>(players.values());}
+	public Player findByName(String name) {return players.get(name);}
 }

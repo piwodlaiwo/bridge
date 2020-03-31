@@ -27,26 +27,26 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer
 		config.setApplicationDestinationPrefixes("/app");
 	}
 
-//	@Override
-//	public void registerStompEndpoints(StompEndpointRegistry registry) {
-//		registry.addEndpoint("/kadziela-bridge-websocket").withSockJS();
-//	}
-
-	@Override 
-	public void registerStompEndpoints(StompEndpointRegistry registry) 
-	{
-		registry.addEndpoint("/kadziela-bridge-websocket").setHandshakeHandler(new DefaultHandshakeHandler() 
-		{
-			public boolean beforeHandshake(ServerHttpRequest request, ServerHttpResponse response, WebSocketHandler wsHandler,Map attributes) throws Exception 
-			{
-		        if (request instanceof ServletServerHttpRequest) 
-		        {
-		            ServletServerHttpRequest servletRequest = (ServletServerHttpRequest) request;
-		            HttpSession session = servletRequest.getServletRequest().getSession();
-		            attributes.put("sessionId", session.getId());
-	            }
-            return true;
-			}
-		}).withSockJS();
+	@Override
+	public void registerStompEndpoints(StompEndpointRegistry registry) {
+		registry.addEndpoint("/kadziela-bridge-websocket").withSockJS();
 	}
+
+//	@Override 
+//	public void registerStompEndpoints(StompEndpointRegistry registry) 
+//	{
+//		registry.addEndpoint("/kadziela-bridge-websocket").setHandshakeHandler(new DefaultHandshakeHandler() 
+//		{
+//			public boolean beforeHandshake(ServerHttpRequest request, ServerHttpResponse response, WebSocketHandler wsHandler,Map attributes) throws Exception 
+//			{
+//		        if (request instanceof ServletServerHttpRequest) 
+//		        {
+//		            ServletServerHttpRequest servletRequest = (ServletServerHttpRequest) request;
+//		            HttpSession session = servletRequest.getServletRequest().getSession();
+//		            attributes.put("sessionId", session.getId());
+//	            }
+//            return true;
+//			}
+//		}).withSockJS();
+//	}
 }
