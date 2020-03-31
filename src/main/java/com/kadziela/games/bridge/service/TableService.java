@@ -65,13 +65,15 @@ public class TableService
 	public void deal(Table table)
 	{
 		Assert.notNull(table, "Cannot deal on a null table");
+		logger.debug(String.format("dealing on table %s",table));
+		table.deal();		
 	}
-	public SeatedPlayer chooseFirstDealer(Table table) throws IllegalArgumentException
+	public Map<Card,SeatPosition> chooseFirstDealer(Table table) throws IllegalArgumentException
 	{
 		Assert.notNull(table, "Cannot choose a dealer on a null table");
 		List<Card> shuffledDeck = table.getDeck().getShuffled();
 		Card north = shuffledDeck.get(0);
-		logger.debug(String.format("NORTH card is %s", north));
+		logger.debug(String.format("NORTH card is %s, ", north));
 		Card east = shuffledDeck.get(1);
 		logger.debug(String.format("EAST card is %s", east));
 		Card south = shuffledDeck.get(2);
@@ -86,6 +88,7 @@ public class TableService
 		map.put(west,SeatPosition.WEST);
 		Map.Entry<Card, SeatPosition> lastEntry = map.lastEntry();
 		logger.debug(String.format("the best card is %s, so the dealer is %s",lastEntry.getKey(),lastEntry.getValue()));
-		return table.getPlayerAtPosition(lastEntry.getValue());
+		table.setCurrentDealer(table.getPlayerAtPosition(lastEntry.getValue()));
+		return map;
 	}
 }

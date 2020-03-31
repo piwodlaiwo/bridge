@@ -2,6 +2,7 @@ package com.kadziela.games.bridge.model;
 
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import com.kadziela.games.bridge.model.enumeration.SeatPosition;
@@ -37,5 +38,13 @@ public class Table
 	}
 	public SeatedPlayer getPlayerAtPosition(SeatPosition sp) {return players.get(sp);}
 	public Collection<SeatedPlayer> getAllSeatedPlayers(){return new HashSet<SeatedPlayer> (players.values());}
-
+	public void deal()
+	{
+		List<Card> shuffledDeck = getDeck().getShuffled();
+		
+		players.get(SeatPosition.NORTH).takeNewCards(shuffledDeck.subList(0, 13));
+		players.get(SeatPosition.EAST).takeNewCards(shuffledDeck.subList(0, 13));
+		players.get(SeatPosition.SOUTH).takeNewCards(shuffledDeck.subList(0, 13));
+		players.get(SeatPosition.WEST).takeNewCards(shuffledDeck.subList(0, 13));
+	}
 }

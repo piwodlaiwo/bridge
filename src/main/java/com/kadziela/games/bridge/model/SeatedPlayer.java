@@ -1,11 +1,16 @@
 package com.kadziela.games.bridge.model;
 
+import java.util.Collection;
+import java.util.TreeSet;
+import java.util.concurrent.ConcurrentSkipListSet;
+
 import com.kadziela.games.bridge.model.enumeration.SeatPosition;
 
 public class SeatedPlayer
 {
 	private SeatPosition position;
 	private Player player;
+	private final Collection<Card> hand = new ConcurrentSkipListSet<Card>();
 	
 	protected SeatedPlayer() {}
 	public SeatedPlayer(SeatPosition pos, Player p) 
@@ -25,6 +30,12 @@ public class SeatedPlayer
 	public void setPlayer(Player player) {
 		this.player = player;
 	}
+	public void takeNewCards(Collection<Card> cards)
+	{
+		hand.clear();
+		hand.addAll(cards);
+	}
+	public Collection<Card> getHandCopy() {return new TreeSet<Card>(hand);}
 	@Override
 	public int hashCode() {
 		final int prime = 31;

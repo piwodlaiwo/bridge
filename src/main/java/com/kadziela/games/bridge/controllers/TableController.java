@@ -14,6 +14,7 @@ import org.springframework.util.Assert;
 
 import com.kadziela.games.bridge.model.Card;
 import com.kadziela.games.bridge.model.Player;
+import com.kadziela.games.bridge.model.SeatedPlayer;
 import com.kadziela.games.bridge.model.Table;
 import com.kadziela.games.bridge.model.enumeration.SeatPosition;
 import com.kadziela.games.bridge.service.RoomService;
@@ -156,9 +157,19 @@ public class TableController
 			if (table.getCurrentDealer() == null)
 			{
 				logger.debug(String.format("dealing at table %s for the first time, choosing the first dealer ... ", table));
-
+				Map<Card,SeatPosition> map = tableService.chooseFirstDealer(table);
+		    	messagingTemplate.convertAndSend("/topic/table/"+tableId, map);
+		    	messagingTemplate.convertAndSend("/topic/table/"+tableId, String.format("current dealer is %s ", table.getCurrentDealer().getPosition()));				
 			}
-
+			else
+			{
+				logger.debug(String.format("dealing at table %s ", table));
+				tableService.deal(table);
+				for(SeatedPlayer player : table.getAllSeatedPlayers())
+				{
+					messagingTemplate.convertAndSend("/queue/private/"+player.getPlayer().getName(), player.getHandCopy());
+				}
+			}
 		}
 		catch (IllegalArgumentException iae)
 	    {
